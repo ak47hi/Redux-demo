@@ -2,6 +2,7 @@ const redux = require("redux");
 
 const createStore = redux.createStore;
 const bindActionCreators = redux.bindActionCreators;
+const combineReducers = redux.combineReducers;
 
 const CAKE_ORDERED = "CAKE_ORDERED";
 const CAKE_RESTOCKED = "CAKE_RESTOCKED";
@@ -30,7 +31,7 @@ function reStockCake(quantity = 1) {
   };
 }
 
-function restockIcecream(quantity = 1) {
+function reStockIcecream(quantity = 1) {
   return {
     type: ICECREAM_RESTOCKED,
     quantity: quantity,
@@ -38,13 +39,15 @@ function restockIcecream(quantity = 1) {
 }
 
 // Initial state of the object
-const initialState = {
-  numOfIcecream: 10,
+const initialCakeState = {
   numOfCakes: 10,
+};
+const initialIcecreamState = {
+  numOfIcecream: 10,
 };
 
 // The reducer function takes in an initial state as default param to the state and an action
-const reducer = (state = initialState, action) => {
+const cakeReducer = (state = initialCakeState, action) => {
   switch (action.type) {
     case CAKE_ORDERED:
       return {
@@ -56,6 +59,13 @@ const reducer = (state = initialState, action) => {
         ...state,
         numOfCakes: state.numOfCakes + action.quantity,
       };
+    default:
+      return state;
+  }
+};
+
+const icecreamReducer = (state = initialIcecreamState, action) => {
+  switch (action.type) {
     case ICECREAM_ORDERED:
       return {
         ...state,
@@ -71,8 +81,13 @@ const reducer = (state = initialState, action) => {
   }
 };
 
+// root reducers that combines multiple reducers
+const rootReducer = combineReducers({
+  cake: cakeReducer,
+  icecream: icecreamReducer,
+});
 //Creating a store
-const store = createStore(reducer);
+const store = createStore(rootReducer);
 
 console.log("Initial state", store.getState());
 
@@ -83,7 +98,7 @@ const unsubscribe = store.subscribe(() =>
 );
 
 const actions = bindActionCreators(
-  { orderCake, reStockCake, orderIcecream, restockIcecream },
+  { orderCake, reStockCake, orderIcecream, reStockIcecream },
   store.dispatch
 );
 
@@ -93,12 +108,12 @@ const actions = bindActionCreators(
 // store.dispatch(orderCake());
 // store.dispatch(reStockCake(2));
 // store.dispatch(orderIcecream());
-// store.dispatch(restockIcecream(2));
+// store.dispatch(reStockIcecream(2));
 
 actions.orderCake();
 actions.reStockCake(1);
 actions.orderIcecream();
 actions.orderIcecream();
-actions.restockIcecream(1);
+actions.reStockIcecream(1);
 // after we unsubscribe we can no longer dipatch an action creator as the listener is already unsubscribed
 unsubscribe();
