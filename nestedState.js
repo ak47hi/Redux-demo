@@ -1,6 +1,6 @@
 const redux = require("redux");
+const produce = require("immer").produce;
 const createStore = redux.createStore;
-
 const UPDATESTREET = "UPDATESTREET";
 
 const initialState = {
@@ -15,17 +15,26 @@ const initialState = {
 function udpateStreet(street) {
   return {
     type: UPDATESTREET,
-    street: street,
+    payload: street,
   };
 }
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case UPDATESTREET:
-      return { ...state, address: { ...state.address, street: action.street } };
+      //   return {
+      //     ...state,
+      //     address: { ...state.address, street: action.payload },
+      //   };
+      return produce(state, (draft) => {
+        draft.address.street = action.payload;
+      });
+    default:
+      return state;
   }
 };
 const store = createStore(reducer);
+console.log("initial state", store.getState());
 
 const unSubscribe = store.subscribe(() =>
   console.log("updated state", store.getState())
